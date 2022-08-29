@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript"
+        src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=z0y30rsY6DYOTTv9x_5TZSUW5Co46gohWeOko8rqZn5yxQ79WHuPZIHOd7KUgl7icSSRV-CPz701yfW9oMhcc0gurTNyamySMzwzpIu3mVR2mR6NzwnY4nNf8Wjc1wcz-np1WEiIeyr1SAePju1Zj5EjzDt1G4EmOFbHbKwFZqUtadNEsJJldWCyYhxvlFEVkPgRxMr4sir-g3TyUstdHVZ4qtHjZcUU9a14CmxCO4asXSLxFweEBu1mRvSgHXDqq-M0rPRco0yL86BGDS-lGksc4vPli4dj3C0sq17qlNOx30eQr-dTS-U2V3zLJB20BWkkHrtVOKpZ0mIzAy8xQjhB-x452SXVrxXJqqjAVTRnT99kiOcRvhyEwqYZKWe0KZNhAA6XBP4V7An2oL8a_w"
+        charset="UTF-8"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <title>Document</title>
+</head>
+
+<body>
+
+    <div class="root">
+    </div>
+    <script type="text/babel">
+        const root = ReactDOM.createRoot(document.querySelector('.root'));
+        const initState = 0
+        const UP_ACTION = 'up'
+        const DOWN_ACTION = 'down'
+        const reducer = (state, action) => {
+            // có thể dùng switch or if đều được
+            switch (action) {
+                case UP_ACTION:
+                    return state + 1
+                case DOWN_ACTION:
+                    return state - 1
+                default:
+                    throw new Error('invalid action')
+            }
+            // if (action == UP_ACTION) return state + 1
+        }
+
+        const initStateInput = {
+            job: '', jobs: []
+        }
+        // const SET_JOB = 'setJob'
+        // const ADD_JOB = 'addJob'
+        // const DELETE_JOB = 'deleteJob'
+        const reducerInput = (state, action) => {
+            let newState
+            // console.log(typeof (action.type))
+            switch (action.type) {
+                case 'SET_JOB':
+                    newState = {
+                        ...state,
+                        job: action.payload
+                    }
+                    break
+                case 'ADD_JOB':
+                    newState = {
+                        ...state,
+                        jobs: [...state.jobs, action.payload]
+                    }
+                    break
+                case 'DELETE_JOB':
+                    let newJobs = [...state.jobs]
+                    newJobs.splice(action.payload, 1)
+                    newState = {
+                        ...state,
+                        jobs: newJobs
+                    }
+                    break
+                default:
+                    throw new Error('Invalid action')
+            }
+            return newState
+        }
+        const setJob = payload => {
+            return {
+                type: 'SET_JOB',
+                payload
+            }
+        }
+        const addJob = payload => {
+            return {
+                type: 'ADD_JOB',
+                payload
+            }
+        }
+        const deleteJob = payload => {
+            return {
+                type: 'DELETE_JOB',
+                payload
+            }
+        }
+        // checkbox
+        const initStateCheckbox = [{
+            id: 1,
+            title: 'Checkbox 1',
+            complete: false
+        }, {
+            id: 2,
+            title: 'Checkbox 2',
+            complete: false
+        }];
+        const reducerCheckbox = (state, action) => {
+            switch (action.type) {
+                case "COMPLETE":
+                // return state.map((todo) => {
+                //     if (todo.id === action.id) {
+                //         return { ...todo, complete: !todo.complete };
+                //     } else {
+                //         return todo;
+                //     }
+                // });
+                default:
+                    return state;
+            }
+        }
+        function App() {
+            const [count, dispatch] = React.useReducer(reducer, initState)
+            const [state, dispatchInput] = React.useReducer(reducerInput, initStateInput)
+            const { job, jobs } = state
+            const [todos, dispatchCheckbox] = React.useReducer(reducerCheckbox, initStateCheckbox)
+            const handleSubmit = () => {
+                dispatchInput(addJob(job))
+                dispatchInput(setJob(''))
+                inputRef.current.focus()
+            }
+            console.log(todos)
+            const inputRef = React.useRef()
+            return (
+                <React.Fragment>
+                    <div style={{ margin: 10 }}>
+                        <h1>{count} </h1>
+                        <button onClick={() => dispatch(UP_ACTION)}> Up</button>
+                        <button onClick={() => dispatch(DOWN_ACTION)}> Down</button>
+                    </div>
+                    <div style={{ margin: 10 }}>
+                        <input
+                            ref={inputRef}
+                            value={job}
+                            placeholder="Input Todo"
+                            onChange={e => {
+                                dispatchInput(setJob(e.target.value))
+                            }}
+                        />
+
+                        <button onClick={handleSubmit}> Add</button>
+                        <ul>
+                            {jobs.map((job, index) =>
+                                <li key={index}>
+                                    {job}
+                                    <span onClick={() => dispatchInput(deleteJob(index))}>&times; </span>
+                                </li>
+                            )}
+                        </ul>
+                    </div>
+
+                    <div style={{ margin: 10 }}>
+                        {todos.map(todo =>
+                            <div key={todo.id}>
+                                <input
+                                    type="checkbox"
+                                    checked={todo.complete}
+                                    onChange={() => dispatchCheckbox({
+                                        type: "COMPLETE",
+                                        id: todo.id
+                                    })}
+                                />
+                                {todo.title}
+                            </div>
+                        )}
+                    </div>
+                </React.Fragment>
+            )
+        }
+        root.render(<App />)
+    </script>
+</body>
+
+</html>
